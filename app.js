@@ -5,7 +5,7 @@ const ADMIN_CREDS = {
 
 const SHEET_IDS = {
     ideation: '1Q5ocABsYcekmIPfMMYaUVZnYm5O9TNOkML7FT4Y0h74',
-    hackathon: '1shie-MN8dcSWm6scZwnytS2AOpub9ErLU1bsFFLvpVo' // Replace with actual hackathon sheet ID
+    hackathon: 'https://sheets.googleapis.com/v4/spreadsheets/1shie-MN8dcSWm6scZwnytS2AOpub9ErLU1bsFFLvpVo/values/Sheet1?key=AIzaSyBTvxdG5xX_54ndGNYZd9l4iCZJalCSO74' // Replace with actual hackathon sheet ID
 };
 
 let currentView = 'ideation';
