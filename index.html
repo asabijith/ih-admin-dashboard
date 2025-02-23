@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="c.css">
+    <title>Student Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <form class="login-form" onsubmit="return handleLogin(event)">
+                <h2>Admin Dashboard Login</h2>
+                <div class="form-group">
+                    <input type="email" class="form-input" id="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-btn">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loading">
+        <i class="fas fa-spinner spinner fa-3x"></i>
+    </div>
+
+    <div class="container" id="dashboard" style="display: none;">
+        <div class="header">
+            <h1 id="dashboardTitle"><span class="fluent-color--person-key-32"></span>Admin Dashboard</h1>
+            <div class="actions">
+                <div class="view-switcher">
+                    <button class="view-btn active" onclick="switchView('ideation')">
+                        <span class="fluent-color--lightbulb-filament-28"></span> Ideation
+                    </button>
+                    <button class="view-btn" onclick="switchView('hackathon')">
+                        <span class="fluent-color--code-block-16"></span> Hackathon
+                    </button>
+                </div>
+                <button class="download-btn" onclick="downloadPDF()">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-container" id="stats"></div>
+
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th><span class="fluent-color--list-bar-32"></span>S.No</th>
+                        <th><span class="fluent-color--person-16"></span>Full Name</th>
+                        <th><span class="fluent-color--mail-multiple-16"></span>Email</th>
+                        <th><span class="fluent-color--phone-32"></span>Phone</th>
+                        <th><span class="fluent-color--building-people-16"></span>College</th>
+                        <th><span class="fluent-color--building-multiple-24"></span>Department</th>
+                        <th><span class="fluent-color--layer-diagonal-person-16"></span>Semester</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="app.js">
+   
+    </script>
+</body>
+</html>
