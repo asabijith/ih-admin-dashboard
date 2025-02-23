@@ -5,7 +5,7 @@ const ADMIN_CREDS = {
 
 const SHEET_IDS = {
     ideation: '1Q5ocABsYcekmIPfMMYaUVZnYm5O9TNOkML7FT4Y0h74',
-    hackathon: 'AKfycbxXppJrqjB1txtNN-qKrGduvPzr6j5jigz-sV1jvSSsP7GEMfFV9Zzgarr7taxuZsDW'
+    hackathon: '1Q5ocABsYcekmIPfMMYaUVZnYm5O9TNOkML7FT4Y0h74'
 };
 
 let currentView = 'ideation';
