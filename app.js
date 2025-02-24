@@ -4,8 +4,8 @@ const ADMIN_CREDS = {
 };
 
 const SHEET_IDS = {
-    ideation: '1Q5ocABsYcekmIPfMMYaUVZnYm5O9TNOkML7FT4Y0h74',
-    hackathon: '1Q5ocABsYcekmIPfMMYaUVZnYm5O9TNOkML7FT4Y0h74'
+    ideation: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w', // Your actual spreadsheet ID
+    hackathon: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w' // Using same ID for both views for now
 };
 
 let currentView = 'ideation';
@@ -73,15 +73,14 @@ function switchView(view) {
     
     // Update active button
     document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === view);
+        btn.classList.toggle('active', btn.textContent.trim().toLowerCase().includes(view));
     });
     
-  // Update view and fetch new data
-currentView = view;
-document.getElementById('dashboardTitle').innerHTML = 
-    `<span class="fluent-color--person-key-32"></span> Admin Dashboard - ${view.charAt(0).toUpperCase() + view.slice(1)}`;
-fetchSheetData();
-
+    // Update view and fetch new data
+    currentView = view;
+    document.getElementById('dashboardTitle').innerHTML = 
+        `<span class="fluent-color--person-key-32"></span> Admin Dashboard - ${view.charAt(0).toUpperCase() + view.slice(1)}`;
+    fetchSheetData();
 }
 
 function updateUI() {
@@ -97,8 +96,16 @@ function updateStats() {
     }
 
     const totalRegistrations = Math.max(0, realtimeData.length - 1);
-    const departments = new Set(realtimeData.slice(1).map(row => row[4])).size;
-    const colleges = new Set(realtimeData.slice(1).map(row => row[3])).size;
+    
+    // Check if we have department and college data at expected indices
+    // Safely get unique departments and colleges, handling potential missing data
+    const departments = new Set();
+    const colleges = new Set();
+    
+    realtimeData.slice(1).forEach(row => {
+        if (row && row.length > 4 && row[4]) departments.add(row[4]);
+        if (row && row.length > 3 && row[3]) colleges.add(row[3]);
+    });
 
     statsContainer.innerHTML = `
         <div class="stat-card">
@@ -107,11 +114,11 @@ function updateStats() {
         </div>
         <div class="stat-card">
             <h3><span class="fluent-color--chart-multiple-24"></span>Unique Departments</h3>
-            <p>${departments}</p>
+            <p>${departments.size}</p>
         </div>
         <div class="stat-card">
             <h3><span class="fluent-color--building-multiple-20"></span>Participating Colleges</h3>
-            <p>${colleges}</p>
+            <p>${colleges.size}</p>
         </div>
     `;
 }
@@ -131,14 +138,21 @@ function updateTable() {
 
     realtimeData.slice(1).forEach((row, index) => {
         const tr = document.createElement("tr");
+        
+        // Ensure we have all the required columns, even if data is missing
+        const safeRow = Array(7).fill('-');
+        row.forEach((cell, i) => {
+            if (i < 7) safeRow[i] = cell || '-';
+        });
+        
         tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${sanitizeHTML(row[0] || '-')}</td>
-            <td>${sanitizeHTML(row[1] || '-')}</td>
-            <td>${sanitizeHTML(row[2] || '-')}</td>
-            <td>${sanitizeHTML(row[3] || '-')}</td>
-            <td>${sanitizeHTML(row[4] || '-')}</td>
-            <td>${sanitizeHTML(row[5] || '-')}</td>
+            <td>${sanitizeHTML(safeRow[0])}</td>
+            <td>${sanitizeHTML(safeRow[1])}</td>
+            <td>${sanitizeHTML(safeRow[2])}</td>
+            <td>${sanitizeHTML(safeRow[3])}</td>
+            <td>${sanitizeHTML(safeRow[4])}</td>
+            <td>${sanitizeHTML(safeRow[5])}</td>
         `;
         tableBody.appendChild(tr);
     });
