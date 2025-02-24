@@ -4,8 +4,14 @@ const ADMIN_CREDS = {
 };
 
 const SHEET_IDS = {
-    ideation: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w', // Your actual spreadsheet ID
-    hackathon: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w' // Using same ID for both views for now
+    ideation: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w',
+    hackathon: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w'
+};
+
+// You may need to change this if your sheet has a different name
+const SHEET_NAMES = {
+    ideation: 'Form Responses 1', // This is often the default name for form responses
+    hackathon: 'Form Responses 1'
 };
 
 let currentView = 'ideation';
@@ -50,19 +56,50 @@ async function fetchSheetData() {
     document.getElementById('loading').style.display = 'flex';
     try {
         const sheetId = SHEET_IDS[currentView];
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?key=AIzaSyBTvxdG5xX_54ndGNYZd9l4iCZJalCSO74`;
+        const sheetName = SHEET_NAMES[currentView];
+        
+        // Try to fetch using public access without API key first
+        let url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+        
         const response = await fetch(url);
+        const text = await response.text();
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // The response is not pure JSON, it's wrapped in a callback function
+        // We need to extract the JSON part
+        const jsonStartIndex = text.indexOf('{');
+        const jsonEndIndex = text.lastIndexOf('}') + 1;
+        const jsonString = text.substring(jsonStartIndex, jsonEndIndex);
+        const data = JSON.parse(jsonString);
         
-        const data = await response.json();
-        realtimeData = data.values || [];
+        // Convert the Google Visualization API format to our expected format
+        const rows = data.table.rows;
+        realtimeData = [
+            // Extract header row - the column labels
+            data.table.cols.map(col => col.label)
+        ];
+        
+        // Extract data rows
+        rows.forEach(row => {
+            const rowData = row.c.map(cell => cell ? (cell.v || '') : '');
+            realtimeData.push(rowData);
+        });
+        
         updateUI();
     } catch (error) {
         console.error("Error fetching sheet data:", error);
-        alert(`Error loading ${currentView} data. Please try again.`);
+        
+        // Show more detailed error for debugging
+        document.getElementById('stats').innerHTML = 
+            `<div class="stat-card error"><h3>Error Loading Data</h3>
+            <p>Please make sure:</p>
+            <ul>
+                <li>Your spreadsheet is publicly accessible (File > Share > Anyone with the link)</li>
+                <li>The spreadsheet ID is correct</li>
+                <li>Your form responses are in the expected sheet</li>
+            </ul>
+            <p>Detailed error: ${error.message}</p></div>`;
+            
+        alert(`Error loading ${currentView} data. Please check console for details.`);
     } finally {
         document.getElementById('loading').style.display = 'none';
     }
@@ -97,14 +134,32 @@ function updateStats() {
 
     const totalRegistrations = Math.max(0, realtimeData.length - 1);
     
-    // Check if we have department and college data at expected indices
-    // Safely get unique departments and colleges, handling potential missing data
+    // Determine column indexes for department and college
+    // This assumes headers are in the first row
+    let departmentIndex = 4; // Default
+    let collegeIndex = 3; // Default
+    
+    // Try to find the actual column indexes based on headers
+    const headers = realtimeData[0] || [];
+    for (let i = 0; i < headers.length; i++) {
+        const header = headers[i]?.toLowerCase() || '';
+        if (header.includes('department') || header.includes('dept')) {
+            departmentIndex = i;
+        }
+        if (header.includes('college') || header.includes('institution') || header.includes('school')) {
+            collegeIndex = i;
+        }
+    }
+    
+    // Safely get unique departments and colleges
     const departments = new Set();
     const colleges = new Set();
     
     realtimeData.slice(1).forEach(row => {
-        if (row && row.length > 4 && row[4]) departments.add(row[4]);
-        if (row && row.length > 3 && row[3]) colleges.add(row[3]);
+        if (row && row.length > departmentIndex && row[departmentIndex]) 
+            departments.add(row[departmentIndex]);
+        if (row && row.length > collegeIndex && row[collegeIndex]) 
+            colleges.add(row[collegeIndex]);
     });
 
     statsContainer.innerHTML = `
@@ -136,23 +191,36 @@ function updateTable() {
         return;
     }
 
+    // Map your spreadsheet columns to the expected display columns
+    // This makes the code more resilient to spreadsheet column changes
+    const headers = realtimeData[0] || [];
+    const columnMapping = [
+        headers.findIndex(h => h?.toLowerCase().includes('name')),  // Name
+        headers.findIndex(h => h?.toLowerCase().includes('email')), // Email
+        headers.findIndex(h => h?.toLowerCase().includes('phone') || h?.toLowerCase().includes('mobile')), // Phone
+        headers.findIndex(h => h?.toLowerCase().includes('college') || h?.toLowerCase().includes('institution')), // College
+        headers.findIndex(h => h?.toLowerCase().includes('department') || h?.toLowerCase().includes('dept')), // Department
+        headers.findIndex(h => h?.toLowerCase().includes('semester') || h?.toLowerCase().includes('year')) // Semester
+    ];
+
     realtimeData.slice(1).forEach((row, index) => {
         const tr = document.createElement("tr");
         
-        // Ensure we have all the required columns, even if data is missing
-        const safeRow = Array(7).fill('-');
-        row.forEach((cell, i) => {
-            if (i < 7) safeRow[i] = cell || '-';
+        const mappedData = columnMapping.map(colIndex => {
+            if (colIndex !== -1 && colIndex < row.length) {
+                return sanitizeHTML(row[colIndex] || '-');
+            }
+            return '-';
         });
         
         tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${sanitizeHTML(safeRow[0])}</td>
-            <td>${sanitizeHTML(safeRow[1])}</td>
-            <td>${sanitizeHTML(safeRow[2])}</td>
-            <td>${sanitizeHTML(safeRow[3])}</td>
-            <td>${sanitizeHTML(safeRow[4])}</td>
-            <td>${sanitizeHTML(safeRow[5])}</td>
+            <td>${mappedData[0]}</td>
+            <td>${mappedData[1]}</td>
+            <td>${mappedData[2]}</td>
+            <td>${mappedData[3]}</td>
+            <td>${mappedData[4]}</td>
+            <td>${mappedData[5]}</td>
         `;
         tableBody.appendChild(tr);
     });
