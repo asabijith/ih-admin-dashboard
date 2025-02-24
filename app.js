@@ -5,7 +5,7 @@ const ADMIN_CREDS = {
 
 const SHEET_IDS = {
     ideation: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w',
-    hackathon: '1z3qZ9OjFi8ERpNK2CBkS4Qs7L7iDs3uUD_y1bIuM94w'
+    hackathon: '19DNtYPCcmseOFCy8m5AatpPWix4dANxhoGxuq4tcBLw'
 };
 
 // You may need to change this if your sheet has a different name
