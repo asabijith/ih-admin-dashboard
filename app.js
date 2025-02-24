@@ -195,11 +195,11 @@ function updateTable() {
     // This makes the code more resilient to spreadsheet column changes
     const headers = realtimeData[0] || [];
     const columnMapping = [
-        headers.findIndex(h => h?.toLowerCase().includes('name')),  // Name
-        headers.findIndex(h => h?.toLowerCase().includes('email')), // Email
-        headers.findIndex(h => h?.toLowerCase().includes('phone') || h?.toLowerCase().includes('mobile')), // Phone
-        headers.findIndex(h => h?.toLowerCase().includes('college') || h?.toLowerCase().includes('institution')), // College
-        headers.findIndex(h => h?.toLowerCase().includes('department') || h?.toLowerCase().includes('dept')), // Department
+        headers.findIndex(h => h?.toLowerCase().includes('Full Name')),  // Name
+        headers.findIndex(h => h?.toLowerCase().includes('Email Address')), // Email
+        headers.findIndex(h => h?.toLowerCase().includes('Phone Number') || h?.toLowerCase().includes('mobile')), // Phone
+        headers.findIndex(h => h?.toLowerCase().includes('Collage Name') || h?.toLowerCase().includes('institution')), // College
+        headers.findIndex(h => h?.toLowerCase().includes('Department') || h?.toLowerCase().includes('dept')), // Department
         headers.findIndex(h => h?.toLowerCase().includes('semester') || h?.toLowerCase().includes('year')) // Semester
     ];
 
