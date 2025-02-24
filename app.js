@@ -83,6 +83,8 @@ async function fetchSheetData() {
             const rowData = row.c.map(cell => cell ? (cell.v || '') : '');
             realtimeData.push(rowData);
         });
+
+        console.log("Raw data received:", realtimeData); // Debug log to see data structure
         
         updateUI();
     } catch (error) {
@@ -136,20 +138,22 @@ function updateStats() {
     
     // Determine column indexes for department and college
     // This assumes headers are in the first row
-    let departmentIndex = 4; // Default
-    let collegeIndex = 3; // Default
+    let departmentIndex = 5; // Default, adjusted based on your spreadsheet screenshot
+    let collegeIndex = 4;    // Default, adjusted based on your spreadsheet screenshot
     
     // Try to find the actual column indexes based on headers
     const headers = realtimeData[0] || [];
     for (let i = 0; i < headers.length; i++) {
-        const header = headers[i]?.toLowerCase() || '';
-        if (header.includes('department') || header.includes('dept')) {
+        const header = String(headers[i] || '').toLowerCase();
+        if (header.includes('department')) {
             departmentIndex = i;
         }
-        if (header.includes('college') || header.includes('institution') || header.includes('school')) {
+        if (header.includes('college')) {
             collegeIndex = i;
         }
     }
+    
+    console.log("College index:", collegeIndex, "Department index:", departmentIndex); // Debug
     
     // Safely get unique departments and colleges
     const departments = new Set();
@@ -192,16 +196,19 @@ function updateTable() {
     }
 
     // Map your spreadsheet columns to the expected display columns
-    // This makes the code more resilient to spreadsheet column changes
     const headers = realtimeData[0] || [];
+    console.log("Headers:", headers); // Debug log
+    
     const columnMapping = [
-        headers.findIndex(h => h?.toLowerCase().includes('Full Name')),  // Name
-        headers.findIndex(h => h?.toLowerCase().includes('Email Address')), // Email
-        headers.findIndex(h => h?.toLowerCase().includes('Phone Number') || h?.toLowerCase().includes('mobile')), // Phone
-        headers.findIndex(h => h?.toLowerCase().includes('Collage Name') || h?.toLowerCase().includes('institution')), // College
-        headers.findIndex(h => h?.toLowerCase().includes('Department') || h?.toLowerCase().includes('dept')), // Department
-        headers.findIndex(h => h?.toLowerCase().includes('semester') || h?.toLowerCase().includes('year')) // Semester
+        headers.findIndex(h => String(h || '').toLowerCase().includes('full name')),  // Name
+        headers.findIndex(h => String(h || '').toLowerCase().includes('email')), // Email
+        headers.findIndex(h => String(h || '').toLowerCase().includes('phone')), // Phone
+        headers.findIndex(h => String(h || '').toLowerCase().includes('college')), // College
+        headers.findIndex(h => String(h || '').toLowerCase().includes('department')), // Department
+        headers.findIndex(h => String(h || '').toLowerCase().includes('team') || String(h || '').toLowerCase().includes('registration')) // Team/Registration
     ];
+    
+    console.log("Column mapping indexes:", columnMapping); // Debug log
 
     realtimeData.slice(1).forEach((row, index) => {
         const tr = document.createElement("tr");
